@@ -123,11 +123,9 @@ def Neighbors(X_train, y_train, X_test, y_test):
     print(f"MSE: {mean_squared_error(y_test, predictions)}")
 
 if __name__ == "__main__":
-    df = pd.read_csv('train/train.csv')
+    df = pd.read_csv('train.csv')
     df = df.drop(columns=['dropoff_datetime'])
-    # print(df.head(7), "\n")
     df = df.sort_values(by="pickup_datetime")
-    # print(df.head(7), "\n")
     train_df, test_df = df.iloc[:1000000], df.iloc[1000000:]
     # print(train_df.tail())
     # print(test_df.tail())
@@ -141,7 +139,7 @@ if __name__ == "__main__":
     group(train_df)
     X_train, y_train = create_features(train_df)
     X_test, y_test = create_features(test_df)
-    # print(X_train.tail(5))
+    print(X_train.tail(5))
     ohe = ColumnTransformer([("One Hot", OneHotEncoder(sparse_output=False), [1])], remainder='passthrough')
     X_train = ohe.fit_transform(X_train)
     X_test = ohe.fit_transform(X_test)
