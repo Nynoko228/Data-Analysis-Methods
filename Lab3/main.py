@@ -72,6 +72,20 @@ def logistic_function(x):
         print(e)
     # return np.dot(X_test, logreg.coef_.T) + logreg.intercept_
 
+def distribution(Y_test, a, b, bins):
+    # Построение гистограммы
+    plt.hist(Y_test, bins=bins, edgecolor='black', lw=2)
+
+    # Добавление названий осей
+    plt.xlabel(f'{a}')
+    plt.ylabel('Частота')
+    plt.title(f'{b}')
+
+    # Показать график
+    plt.show()
+
+
+
 if __name__ == "__main__":
     X, y = download()
     X = analysisNan(X)
@@ -108,9 +122,14 @@ if __name__ == "__main__":
     pred_predict_proba = logreg.predict_proba(X_test)[:, 1]
     print(f"pred_prob равна pred_predict_proba? {np.all([pred_prob, pred_predict_proba])}")
     pred_bin = (pred_prob >= 0.5).astype(int)
-    print(len(pred_bin), len(Y_test), len(X_test))
-    print(type(pred_bin), type(X_test))
     print(f'Точность predict_proba: {np.mean(pred_bin == Y_test[:].values)}')
     pred_class = logreg.predict(X_test)
     print(f'Точность predict: {np.mean(pred_class == Y_test[:].values)}')
+    distribution(Y_test, "Значение", "Распределение целевого значения", 2)
+    distribution(pred_prob, "Значение", "Распределение предсказываемого значения", 10)
+    selected_indices = np.where((pred_prob >= 0.75) & (pred_prob <= 0.85))[0]
+    pred_selected = logreg.predict(X_test.iloc[selected_indices])
+    print(f'Точность на отрезке от 0.75 до 0.85: {np.mean(pred_selected == Y_test.iloc[selected_indices].values)}')
+
+
 
