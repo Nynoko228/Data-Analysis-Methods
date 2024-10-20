@@ -107,3 +107,10 @@ if __name__ == "__main__":
     # print(pred_prob)
     pred_predict_proba = logreg.predict_proba(X_test)[:, 1]
     print(f"pred_prob равна pred_predict_proba? {np.all([pred_prob, pred_predict_proba])}")
+    pred_bin = (pred_prob >= 0.5).astype(int)
+    print(len(pred_bin), len(Y_test), len(X_test))
+    print(type(pred_bin), type(X_test))
+    print(f'Точность predict_proba: {np.mean(pred_bin == Y_test[:].values)}')
+    pred_class = logreg.predict(X_test)
+    print(f'Точность predict: {np.mean(pred_class == Y_test[:].values)}')
+
