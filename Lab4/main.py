@@ -115,8 +115,17 @@ def split_node(R_m, feature, t):
 
 def q_error(R_m, feature, t, y):
     left, right = split_node(R_m, feature, t)
-    print(left, right)
+    # print(left, right)
     return (len(left)/len(R_m)*H(left, y)+len(right)/len(R_m)*H(right, y))
+
+def get_optimal_split(R_m, feature, y):
+    Q_array = []
+    feature_values = np.unique(R_m[feature])
+    for t in feature_values:
+        a = q_error(R_m, feature, t, y)
+        not np.isnan(a) and Q_array.append(a)
+    opt_threshold = feature_values[np.argmin(Q_array)]
+    return opt_threshold, Q_array
 
 if __name__ == "__main__":
     # X, y = make_seed()
@@ -157,6 +166,50 @@ if __name__ == "__main__":
     plt.hist(y, bins=20)
     plt.show()
     X_train, X_test, Y_train, Y_test = train_test_split(X, y, test_size=0.25, random_state=13)
-    print(f'Ошибка: {q_error(X_train, "Chins", 5, y)}')
-
-
+    Q_array = [q_error(X_train, "Chins", 5, y)]
+    print(f'Ошибка: {Q_array[0]}')
+    feature = 'Chins'
+    feature_values = np.unique(X_train[feature])
+    print(feature_values, len(feature_values))
+    Q_array = list(map(lambda x: q_error(X_train, 'Chins', x, y), feature_values))
+    print(Q_array)
+    nan_value = feature_values[np.where(np.isnan(Q_array))]
+    plt.figure(figsize=(10, 6))
+    plt.plot(feature_values, Q_array, marker='o', linestyle='-')
+    plt.xlabel('Порог')
+    plt.ylabel('Значение ошибки')
+    plt.title(f'Feature {feature}')
+    plt.grid(True)
+    plt.show()
+    # Задание 2.4
+    results = []
+    for f in X_train.columns:
+        t, Q_array = get_optimal_split(X_train, f, y)
+        print(t, Q_array, Q_array[np.argmin(Q_array)])
+        results.append((f, t, Q_array[np.argmin(Q_array)]))
+    results = sorted(results, key=lambda x: x[2])
+    print(f"Результаты 2.4: {results}")
+    results_df = pd.DataFrame(results, columns=['feature', 'optimal t', 'min Q error'])
+    optimal_feature, optimal_t, optimal_error = results[0]
+    print(results_df)
+    _, optimal_Q_array = get_optimal_split(X_train, optimal_feature, y)
+    plt.figure(figsize=(10, 6))
+    print(X_train[optimal_feature], optimal_Q_array)
+    print(np.unique(X_train[optimal_feature]))
+    print(nan_value)
+    plt.plot(np.delete(np.unique(X_train[optimal_feature]), np.where(np.unique(X_train[optimal_feature]) == nan_value)[0][0]), optimal_Q_array, marker='o', linestyle='-')
+    plt.xlabel('Порог')
+    plt.ylabel('Значение ошибки')
+    plt.title(f'Feature {feature}')
+    plt.grid(True)
+    plt.show()
+    # Задание 2.5
+    print(len(X[optimal_feature]), len(y))
+    print(X[optimal_feature], y)
+    print(type(X[optimal_feature]), type(y))
+    plt.scatter(X[optimal_feature], y)
+    plt.axvline(x=optimal_t, color="red")
+    plt.xlabel(optimal_feature)
+    plt.ylabel('target')
+    plt.title('Feature: {} | optimal t: {} | Q error: {:.2f}'.format(optimal_feature, optimal_t, optimal_error))
+    plt.show()
