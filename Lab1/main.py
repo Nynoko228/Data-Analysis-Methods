@@ -22,7 +22,8 @@ def age(data):
 
 
 def cntofabsences(data):
-    print(f"Количество учеников с нечётным числом пропусков составляет {len([i for i in data['absences'] if i % 2 == 1])}")
+    print(f"Количество учеников с нечётным числом пропусков составляет \
+{len([i for i in data['absences'] if i % 2 == 1])}")
 
 
 def raznosti(data):
@@ -30,7 +31,8 @@ def raznosti(data):
     NoRomantic = d.query("romantic == 'no'")['G3'].mean()
     YesRomantic = d.query("romantic == 'yes'")['G3'].mean()
     print(
-        f"Разность между средними итоговыми оценками студентов, состоящих и не состоящих в романтических отношениях составляет {round(abs(NoRomantic - YesRomantic), 2)} баллов")
+        f"Разность между средними итоговыми оценками студентов, состоящих и не состоящих в романтических "
+        f"отношениях составляет {round(abs(NoRomantic - YesRomantic), 2)} баллов")
 
 
 def six(data):
@@ -38,7 +40,8 @@ def six(data):
     d = data[['absences', 'activities']]
     absences = d.query(f"activities == '{activities}'")['absences'].value_counts()
     print(
-        f"Чаще всего студенты с внеклассными занятиями имели {absences.index[0]} пропусков и количество таких студентов составляет {absences[0]}")
+        f"Чаще всего студенты с внеклассными занятиями имели {absences.index[0]} "
+        f"пропусков и количество таких студентов составляет {absences[0]}")
 
 
 def histogramma(data):
@@ -55,6 +58,8 @@ def histogramma(data):
     plt.show()
 
 
+# print(data[(data['guardian'] == 'mother') & ((data['Mjob'] == 'teacher') | (data['Mjob'] == 'at_home'))].head())
+# print(data.iloc[:, :-1].head())
 reasons(data)
 MFedu(data)
 age(data)
