@@ -7,6 +7,26 @@ import pandas as pd
 from sklearn.datasets import load_linnerud
 from sklearn.model_selection import train_test_split
 
+def practice():
+    X, y = make_seed()
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=13)
+    lr, y_pred_lr = logreg(X_train, y_train< X_test)
+    print(accuracy_score(y_pred_lr, y_test))
+    decision_regions(X_test, y_test, lr)
+    dt, y_pred_dt = make_DT(X_train, y_train, X_test)
+    print(accuracy_score(y_pred_dt, y_test))
+    decision_regions(X_test, y_test, dt)
+    X, y = make_seed2()
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=13)
+    lr, y_pred_lr = logreg(X_train, y_train, X_test)
+    print(accuracy_score(y_pred_lr, y_test))
+    decision_regions(X_test, y_test, lr)
+    dt, y_pred_dt = make_DT(X_train, y_train, X_test)
+    print(accuracy_score(y_pred_dt, y_test))
+    decision_regions(X_test, y_test, dt)
+    overtraining()
+    instability()
+
 def make_seed():
     plt.rcParams['figure.figsize'] = (11, 6.5)
     np.random.seed(13)
@@ -127,26 +147,7 @@ def get_optimal_split(R_m, feature, y):
     opt_threshold = feature_values[np.argmin(Q_array)]
     return opt_threshold, Q_array
 
-if __name__ == "__main__":
-    # X, y = make_seed()
-    # X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=13)
-    # lr, y_pred_lr = logreg(X_train, y_train< X_test)
-    # print(accuracy_score(y_pred_lr, y_test))
-    # decision_regions(X_test, y_test, lr)
-    # dt, y_pred_dt = make_DT(X_train, y_train, X_test)
-    # print(accuracy_score(y_pred_dt, y_test))
-    # decision_regions(X_test, y_test, dt)
-    # X, y = make_seed2()
-    # X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=13)
-    # lr, y_pred_lr = logreg(X_train, y_train, X_test)
-    # print(accuracy_score(y_pred_lr, y_test))
-    # decision_regions(X_test, y_test, lr)
-    # dt, y_pred_dt = make_DT(X_train, y_train, X_test)
-    # print(accuracy_score(y_pred_dt, y_test))
-    # decision_regions(X_test, y_test, dt)
-    # overtraining()
-    # instability()
-    # linnerud = load_linnerud(as_frame=True)
+def preparation():
     linnerud = load_linnerud()
     print(linnerud.DESCR)
     print(f"Ключи датасета: {linnerud.keys()}")
@@ -160,18 +161,20 @@ if __name__ == "__main__":
     y = linnerud.target
     print(f"Последние 5 значений y:\n{y[-5:]}")
     print(f"Размер y: {len(y)}")
+    return linnerud, X, y
+
+def raspredelenie(y):
     plt.title('... distribution')
     plt.xlabel('...')
     plt.ylabel('# samples')
     plt.hist(y, bins=20)
     plt.show()
-    X_train, X_test, Y_train, Y_test = train_test_split(X, y, test_size=0.25, random_state=13)
-    Q_array = [q_error(X_train, "Chins", 5, y)]
-    print(f'Ошибка: {Q_array[0]}')
+
+def zadanie_2_3(X_train, y):
     feature = 'Chins'
     feature_values = np.unique(X_train[feature])
     print(feature_values, len(feature_values))
-    Q_array = list(map(lambda x: q_error(X_train, 'Chins', x, y), feature_values))
+    Q_array = list(map(lambda x: q_error(X_train, feature, x, y), feature_values))
     print(Q_array)
     nan_value = feature_values[np.where(np.isnan(Q_array))]
     plt.figure(figsize=(10, 6))
@@ -181,11 +184,13 @@ if __name__ == "__main__":
     plt.title(f'Feature {feature}')
     plt.grid(True)
     plt.show()
-    # Задание 2.4
+    return feature, nan_value
+
+def zadanie_2_4(X_train):
     results = []
     for f in X_train.columns:
         t, Q_array = get_optimal_split(X_train, f, y)
-        print(t, Q_array, Q_array[np.argmin(Q_array)])
+        # print(t, Q_array, Q_array[np.argmin(Q_array)])
         results.append((f, t, Q_array[np.argmin(Q_array)]))
     results = sorted(results, key=lambda x: x[2])
     print(f"Результаты 2.4: {results}")
@@ -194,22 +199,35 @@ if __name__ == "__main__":
     print(results_df)
     _, optimal_Q_array = get_optimal_split(X_train, optimal_feature, y)
     plt.figure(figsize=(10, 6))
-    print(X_train[optimal_feature], optimal_Q_array)
-    print(np.unique(X_train[optimal_feature]))
-    print(nan_value)
+    # print(X_train[optimal_feature], optimal_Q_array)
+    # print(np.unique(X_train[optimal_feature]))
+    # print(nan_value)
     plt.plot(np.delete(np.unique(X_train[optimal_feature]), np.where(np.unique(X_train[optimal_feature]) == nan_value)[0][0]), optimal_Q_array, marker='o', linestyle='-')
     plt.xlabel('Порог')
     plt.ylabel('Значение ошибки')
     plt.title(f'Feature {feature}')
     plt.grid(True)
     plt.show()
-    # Задание 2.5
-    print(len(X[optimal_feature]), len(y))
-    print(X[optimal_feature], y)
-    print(type(X[optimal_feature]), type(y))
-    plt.scatter(X[optimal_feature], y)
+    return optimal_feature, optimal_t, optimal_error, X_train
+
+def zadanie_2_5(optimal_feature, optimal_t, optimal_error, y_df, X):
+    plt.scatter(X[optimal_feature], y_df["Weight"])
     plt.axvline(x=optimal_t, color="red")
     plt.xlabel(optimal_feature)
     plt.ylabel('target')
     plt.title('Feature: {} | optimal t: {} | Q error: {:.2f}'.format(optimal_feature, optimal_t, optimal_error))
     plt.show()
+
+
+if __name__ == "__main__":
+    linnerud, X, y = preparation()
+    raspredelenie(y)
+    X_train, X_test, Y_train, Y_test = train_test_split(X, y, test_size=0.25, random_state=13)
+    Q_array = [q_error(X_train, "Chins", 5, y)]
+    print(f'Ошибка: {Q_array[0]}')
+    feature, nan_value = zadanie_2_3(X_train, y)
+    optimal_feature, optimal_t, optimal_error, X_train = zadanie_2_4(X_train)
+    # Задание 2.5
+    y_df = pd.DataFrame(y, columns=linnerud.target_names)
+    zadanie_2_5(optimal_feature, optimal_t, optimal_error, y_df, X)
+
