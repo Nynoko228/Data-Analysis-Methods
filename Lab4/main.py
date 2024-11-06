@@ -218,6 +218,99 @@ def zadanie_2_5(optimal_feature, optimal_t, optimal_error, y_df, X):
     plt.title('Feature: {} | optimal t: {} | Q error: {:.2f}'.format(optimal_feature, optimal_t, optimal_error))
     plt.show()
 
+def zadanie_3_1(X_train, X_test, y_train, y_test):
+    from sklearn.tree import DecisionTreeRegressor
+    dt = DecisionTreeRegressor(max_depth=3, random_state=13)
+    dt.fit(X_train, y_train)
+
+    from sklearn.tree import plot_tree
+    plot_tree(dt, feature_names=X.columns, filled=True, rounded=True)
+    plt.show()
+    return dt
+
+def zadanie_3_2(X_train, X_test, y_train, y_test, dt):
+    from sklearn.tree import DecisionTreeRegressor
+    from sklearn.metrics import mean_squared_error
+    mean_squared_error(y_test, dt.predict(X_test))
+
+    max_depth_array = range(2, 20)
+    mse_array = []
+    for max_depth in max_depth_array:
+        dt = DecisionTreeRegressor(max_depth=max_depth, random_state=13)
+        dt.fit(X_train, y_train)
+        mse_array.append(mean_squared_error(y_test, dt.predict(X_test)))
+    plt.plot(max_depth_array, mse_array)
+    plt.title('Dependence of MSE on max depth')
+    plt.xlabel('max depth')
+    plt.ylabel('MSE')
+    plt.show()
+
+    pd.DataFrame({
+        'max_depth': max_depth_array,
+        'MSE': mse_array
+    }).sort_values(by='MSE').reset_index(drop=True)
+
+    min_samples_leaf_array = range(1, 20)
+    mse_array = []
+    for min_samples_leaf in min_samples_leaf_array:
+        dt = DecisionTreeRegressor(max_depth=6, min_samples_leaf=min_samples_leaf, random_state=13)
+        dt.fit(X_train, y_train)
+        mse_array.append(mean_squared_error(y_test, dt.predict(X_test)))
+    plt.plot(min_samples_leaf_array, mse_array)
+    plt.title('Dependence of MSE on min samples leaf')
+    plt.xlabel('min samples leaf')
+    plt.ylabel('MSE')
+    plt.show()
+
+    min_samples_split_array = range(2, 20)
+    mse_array = []
+    for min_samples_split in min_samples_split_array:
+        dt = DecisionTreeRegressor(max_depth=6, min_samples_split=min_samples_split, random_state=13)
+        dt.fit(X_train, y_train)
+        mse_array.append(mean_squared_error(y_test, dt.predict(X_test)))
+    plt.plot(min_samples_split_array, mse_array)
+    plt.title('Dependence of MSE on min samples split')
+    plt.xlabel('min samples split')
+    plt.ylabel('MSE')
+    plt.show()
+
+    from sklearn.tree import plot_tree
+    dt = DecisionTreeRegressor(max_depth=6, random_state=13)
+    dt.fit(X_train, y_train)
+    plot_tree(dt, feature_names=X.columns, filled=True, rounded=True)
+    plt.show()
+
+    mean_squared_error(y_test, dt.predict(X_test))
+
+    print(f"dt.feature_importances_: {dt.feature_importances_}")
+
+    pd.DataFrame({
+        'feature': X.columns,
+        'importance': dt.feature_importances_
+    }).sort_values(by='importance', ascending=False).reset_index(drop=True)
+
+def zadanie_3_3(X_train, X_test, y_train, y_test):
+    print(X_train.head())
+
+    from sklearn.preprocessing import StandardScaler
+    sc = StandardScaler()
+    X_train_scaled = pd.DataFrame(sc.fit_transform(X_train), columns=X_train.columns, index=X_train.index)
+    X_test_scaled = pd.DataFrame(sc.transform(X_test), columns=X_test.columns, index=X_test.index)
+    X_train_scaled.head()
+
+    from sklearn.tree import DecisionTreeRegressor
+    from sklearn.metrics import mean_squared_error
+    # with scaling
+    for max_depth in [3, 6]:
+        dt = DecisionTreeRegressor(max_depth=max_depth, random_state=13)
+        dt.fit(X_train_scaled, y_train)
+        print(mean_squared_error(y_test, dt.predict(X_test_scaled)))
+
+    # without scaling
+    for max_depth in [3, 6]:
+        dt = DecisionTreeRegressor(max_depth=max_depth, random_state=13)
+        dt.fit(X_train, y_train)
+        print(mean_squared_error(y_test, dt.predict(X_test)))
 
 if __name__ == "__main__":
     linnerud, X, y = preparation()
@@ -230,4 +323,7 @@ if __name__ == "__main__":
     # Задание 2.5
     y_df = pd.DataFrame(y, columns=linnerud.target_names)
     zadanie_2_5(optimal_feature, optimal_t, optimal_error, y_df, X)
+    dt = zadanie_3_1(X_train, X_test, Y_train, Y_test)
+    zadanie_3_2(X_train, X_test, Y_train, Y_test, dt)
+    zadanie_3_3(X_train, X_test, Y_train, Y_test)
 
