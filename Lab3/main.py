@@ -9,34 +9,27 @@ pd.set_option('display.width', 0)
 
 def download():
     df = pd.read_csv('titanic.csv')
-    # print(df.head())
     X, y = df[['Pclass', 'Sex', 'Age', 'SibSp', 'Parch', 'Fare', 'Embarked']], df['Survived']
     return X, y
 
 def analysisNan(X):
     missing = X.isnull().sum()
-    print(missing[missing > 0].index.tolist())
+    # print(missing[missing > 0].index.tolist())
     for i in missing[missing > 0].index.tolist():
         if pd.api.types.is_numeric_dtype(X[i]):
-            # print(X[i].dtype)
             X[i] = pd.Series(X[i].fillna(X[i].mean(skipna=True)))
-            # print(X[i].fillna(X[i].mean(skipna=True)))
-            # print(X[i])
         else:
-            # print(X[i].dtype)
-            # print(X[i].iloc[61])
-            # print(X[i].index[X[i].isnull()])
             X[i] = pd.Series(X[i].fillna("None"))
-            # print(X[i].iloc[61])
-    # print(X.info())
     return X
 
 def srez(X, y):
     X_train, X_test, Y_train, Y_test = X.iloc[:int(len(X) * 0.7)], X.iloc[int(len(X) * 0.7):], y.iloc[:int(len(y) * 0.7)], y.iloc[int(len(y) * 0.7):]
+    print("Shape")
     print(X_train.shape, X_test.shape, Y_train.shape, Y_test.shape)
     return X_train, X_test, Y_train, Y_test
 
 def mashtab(X_train, Y_train, X_test):
+    print("mashtab")
     scaler = StandardScaler()
     print(X_train)
     scaler.fit(X=X_train, y=Y_train)
@@ -88,6 +81,7 @@ def distribution(Y_test, a, b, bins):
 
 if __name__ == "__main__":
     X, y = download()
+    print(f"X.info():\n{X.info()}")
     X = analysisNan(X)
     # print(X.head())
     # print(y.head())
@@ -105,13 +99,11 @@ if __name__ == "__main__":
     #         # print(X[i].index[X[i].isnull()])
     #         X[i] = pd.Series(X[i].fillna("None"))
     #         # print(X[i].iloc[61])
-    print(X.info())
-    print(X['Sex'].unique())
+    # print(f"X.info():\n{X.info()}")
+    # print(f"X['Sex'].unique():\n{X['Sex'].unique()}")
     X['Sex'] = X['Sex'].map(lambda x: 1 if x == 'male' else 0)
-    print(X['Sex'].unique())
-    print(X['Embarked'].unique())
     X = pd.get_dummies(X)
-    print(X)
+    print(f"X:\n{X}")
     X_train, X_test, Y_train, Y_test = srez(X, y)
     mashtab(X_train, Y_train, X_test)
     logreg = regression(X_train, Y_train)
