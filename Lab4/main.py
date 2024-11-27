@@ -7,10 +7,11 @@ import pandas as pd
 from sklearn.datasets import load_linnerud
 from sklearn.model_selection import train_test_split
 
+
 def practice():
     X, y = make_seed()
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=13)
-    lr, y_pred_lr = logreg(X_train, y_train< X_test)
+    lr, y_pred_lr = logreg(X_train, y_train < X_test)
     print(accuracy_score(y_pred_lr, y_test))
     decision_regions(X_test, y_test, lr)
     dt, y_pred_dt = make_DT(X_train, y_train, X_test)
@@ -27,6 +28,7 @@ def practice():
     overtraining()
     instability()
 
+
 def make_seed():
     plt.rcParams['figure.figsize'] = (11, 6.5)
     np.random.seed(13)
@@ -39,16 +41,19 @@ def make_seed():
     plt.show()
     return X, y
 
+
 def logreg(X_train, y_train, X_test):
     lr = LogisticRegression(random_state=13)
     lr.fit(X_train, y_train)
     y_pred_lr = lr.predict(X_test)
     return lr, y_pred_lr
 
+
 def decision_regions(X_test, y_test, lr):
     from mlxtend.plotting import plot_decision_regions
     plot_decision_regions(X_test, y_test, lr)
     plt.show()
+
 
 def make_DT(X_train, y_train, X_test):
     from sklearn.tree import DecisionTreeClassifier
@@ -59,6 +64,7 @@ def make_DT(X_train, y_train, X_test):
 
     return dt, y_pred_dt
 
+
 def make_seed2():
     np.random.seed(13)
     X = np.random.randn(500, 2)
@@ -66,6 +72,7 @@ def make_seed2():
     plt.scatter(X[:, 0], X[:, 1], s=100, c=y, cmap='winter')
     plt.show()
     return X, y
+
 
 def overtraining():
     np.random.seed(13)
@@ -96,6 +103,7 @@ def overtraining():
 
     print(accuracy_score(y, dt.predict(X)))
 
+
 def instability():
     np.random.seed(13)
     n = 100
@@ -123,6 +131,7 @@ def instability():
             plot_decision_regions(X_part, y_part, dt, ax=ax[i][j])
     plt.show()
 
+
 def H(R, y):
     return y[R.index].var(ddof=0)
 
@@ -136,7 +145,8 @@ def split_node(R_m, feature, t):
 def q_error(R_m, feature, t, y):
     left, right = split_node(R_m, feature, t)
     # print(left, right)
-    return (len(left)/len(R_m)*H(left, y)+len(right)/len(R_m)*H(right, y))
+    return (len(left) / len(R_m) * H(left, y) + len(right) / len(R_m) * H(right, y))
+
 
 def get_optimal_split(R_m, feature, y):
     Q_array = []
@@ -146,6 +156,7 @@ def get_optimal_split(R_m, feature, y):
         not np.isnan(a) and Q_array.append(a)
     opt_threshold = feature_values[np.argmin(Q_array)]
     return opt_threshold, Q_array
+
 
 def preparation():
     linnerud = load_linnerud()
@@ -163,12 +174,14 @@ def preparation():
     print(f"Размер y: {len(y)}")
     return linnerud, X, y
 
+
 def raspredelenie(y):
     plt.title('... distribution')
     plt.xlabel('...')
     plt.ylabel('# samples')
     plt.hist(y, bins=20)
     plt.show()
+
 
 def zadanie_2_3(X_train, y):
     feature = 'Chins'
@@ -186,6 +199,7 @@ def zadanie_2_3(X_train, y):
     plt.show()
     return feature, nan_value
 
+
 def zadanie_2_4(X_train):
     results = []
     for f in X_train.columns:
@@ -202,13 +216,16 @@ def zadanie_2_4(X_train):
     # print(X_train[optimal_feature], optimal_Q_array)
     # print(np.unique(X_train[optimal_feature]))
     # print(nan_value)
-    plt.plot(np.delete(np.unique(X_train[optimal_feature]), np.where(np.unique(X_train[optimal_feature]) == nan_value)[0][0]), optimal_Q_array, marker='o', linestyle='-')
+    plt.plot(np.delete(np.unique(X_train[optimal_feature]),
+                       np.where(np.unique(X_train[optimal_feature]) == nan_value)[0][0]), optimal_Q_array, marker='o',
+             linestyle='-')
     plt.xlabel('Порог')
     plt.ylabel('Значение ошибки')
     plt.title(f'Feature {feature}')
     plt.grid(True)
     plt.show()
     return optimal_feature, optimal_t, optimal_error, X_train
+
 
 def zadanie_2_5(optimal_feature, optimal_t, optimal_error, y_df, X):
     plt.scatter(X[optimal_feature], y_df["Weight"])
@@ -217,6 +234,7 @@ def zadanie_2_5(optimal_feature, optimal_t, optimal_error, y_df, X):
     plt.ylabel('target')
     plt.title('Feature: {} | optimal t: {} | Q error: {:.2f}'.format(optimal_feature, optimal_t, optimal_error))
     plt.show()
+
 
 def zadanie_3_1(X_train, X_test, y_train, y_test):
     from sklearn.tree import DecisionTreeRegressor
@@ -227,6 +245,7 @@ def zadanie_3_1(X_train, X_test, y_train, y_test):
     plot_tree(dt, feature_names=X.columns, filled=True, rounded=True)
     plt.show()
     return dt
+
 
 def zadanie_3_2(X_train, X_test, y_train, y_test, dt):
     from sklearn.tree import DecisionTreeRegressor
@@ -289,6 +308,7 @@ def zadanie_3_2(X_train, X_test, y_train, y_test, dt):
         'importance': dt.feature_importances_
     }).sort_values(by='importance', ascending=False).reset_index(drop=True)
 
+
 def zadanie_3_3(X_train, X_test, y_train, y_test):
     print(X_train.head())
 
@@ -312,10 +332,13 @@ def zadanie_3_3(X_train, X_test, y_train, y_test):
         dt.fit(X_train, y_train)
         print(mean_squared_error(y_test, dt.predict(X_test)))
 
+
 if __name__ == "__main__":
     linnerud, X, y = preparation()
+    print(type(X), type(y))
     raspredelenie(y)
     X_train, X_test, Y_train, Y_test = train_test_split(X, y, test_size=0.25, random_state=13)
+    print(type(X_train), type(Y_train))
     Q_array = [q_error(X_train, "Chins", 5, y)]
     print(f'Ошибка: {Q_array[0]}')
     feature, nan_value = zadanie_2_3(X_train, y)
@@ -326,4 +349,3 @@ if __name__ == "__main__":
     dt = zadanie_3_1(X_train, X_test, Y_train, Y_test)
     zadanie_3_2(X_train, X_test, Y_train, Y_test, dt)
     zadanie_3_3(X_train, X_test, Y_train, Y_test)
-
