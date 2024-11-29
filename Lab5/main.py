@@ -23,8 +23,6 @@ pd.set_option('display.width', 0)
 import threading
 
 def preprocess_text(texts):
-    print(nltk.data.find('tokenizers/punkt'))
-    print(nltk.data.find('corpora/stopwords'))
     stop_words = set(stopwords.words('russian'))
     regex = re.compile('[^а-я А-Я]')
     preprocess_texts = []
@@ -37,7 +35,6 @@ def preprocess_text(texts):
     return preprocess_texts
 
 def stemming_texts(texts):
-    # st = LancasterStemmer()
     st = SnowballStemmer("russian")
     stem_text = []
     for text in tqdm.tqdm(texts):
@@ -67,25 +64,25 @@ def prepare_data_TF(df, text_column, target_column, test_size=0.3, random_state=
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
     return X_train, X_test, y_train, y_test
 
-def learning(X_train, y_train, num, bag):
+def learning(X_train, y_train, X_test, y_test, num, bag):
     from sklearn.model_selection import train_test_split, GridSearchCV
     from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
-    from sklearn.feature_extraction.text import TfidfVectorizer
     from sklearn.metrics import accuracy_score
     RFC, GBC = RandomForestClassifier(), GradientBoostingClassifier()
     param_grid_rf = {'max_depth': [5, 6, 7], 'max_features': ['sqrt', 'log2']}
     grid_rf = GridSearchCV(RFC, param_grid_rf, cv=3, n_jobs=-1)
     grid_rf.fit(X_train, y_train)
-    # grid_rf.fit(X_train, y_train)
-
-    print(f"Лучшие параметры у дерева: {grid_rf.best_params_}, {num}, {bag}")
+    y_predicted = grid_rf.predict(X_test)
+    accuracy_score_n = accuracy_score(y_predicted, y_test)
+    print(f"Лучшие параметры у дерева: {grid_rf.best_params_}, {num}, {bag}, {accuracy_score_n}")
 
     param_grid_gb = {'max_depth': [5, 6, 7], 'max_features': ['sqrt', 'log2']}
+    # param_grid_gb = {'max_depth': [10, 20, 30], 'max_features': ['sqrt', 'log2']}
     grid_gb = GridSearchCV(GBC, param_grid_gb, cv=3, n_jobs=-1)
     grid_gb.fit(X_train, y_train)
-    # grid_gb.fit(X_train, y_train)
-
-    print(f"Лучшие параметры у градиентного спуска: {grid_gb.best_params_}, {num}, {bag}")
+    y_predicted = grid_gb.predict(X_test)
+    accuracy_score_n = accuracy_score(y_predicted, y_test)
+    print(f"Лучшие параметры у градиентного спуска: {grid_gb.best_params_}, {num}, {bag}, {accuracy_score_n}")
 
 def Bag_of_Words():
     from sklearn.feature_extraction.text import CountVectorizer
@@ -159,27 +156,25 @@ if __name__ == "__main__":
     data_stemming = preprocess_data
     data_stemming["message"] = stemming_texts(preprocess_data["message"])
     print(f"data_stemming:\n{data_stemming}")
-    logs = "output.txt"
 
+    logs = "output.txt"
     with open(logs, "w", encoding="utf-8") as file:
         # Перенаправляем вывод
         sys.stdout = file
         X_train, X_test, y_train, y_test = prepare_data(df, "message", "sentiment")
         X_train_preprocess, X_test_preprocess, y_train_preprocess, y_test_preprocess = prepare_data(preprocess_data, "message", "sentiment")
         X_train_stemming, X_test_stemming, y_train_stemming, y_test_stemming = prepare_data(data_stemming, "message", "sentiment")
-        threading.Thread(target=learning, args=(X_train, y_train, "исходные тексты", "Обычный мешок слов")).run()
-        threading.Thread(target=learning, args=(X_train_preprocess, y_train_preprocess, "предварительно обработанные тексты", "Обычный мешок слов")).run()
-        threading.Thread(target=learning, args=(X_train_stemming, y_train_stemming, "тексты после стемминга", "Обычный мешок слов")).run()
+        threading.Thread(target=learning, args=(X_train, y_train, X_test, y_test, "исходные тексты", "Обычный мешок слов")).run()
+        threading.Thread(target=learning, args=(X_train_preprocess, y_train_preprocess, X_test_preprocess, y_test_preprocess, "предварительно обработанные тексты", "Обычный мешок слов")).run()
+        threading.Thread(target=learning, args=(X_train_stemming, y_train_stemming, X_test_stemming,  y_test_stemming, "тексты после стемминга", "Обычный мешок слов")).run()
 
         X_trainTF, X_testTF, y_trainTF, y_testTF = prepare_data_TF(df, "message", "sentiment")
         X_train_preprocessTF, X_test_preprocessTF, y_train_preprocessTF, y_test_preprocessTF = prepare_data_TF(preprocess_data, "message", "sentiment")
         X_train_stemmingTF, X_test_stemmingTF, y_train_stemmingTF, y_test_stemmingTF = prepare_data_TF(data_stemming, "message", "sentiment")
-
-        threading.Thread(target=learning, args=(X_trainTF, y_trainTF, "исходные тексты", "Взвешенный мешок слов")).run()
-        threading.Thread(target=learning, args=(X_train_preprocessTF, y_train_preprocessTF, "предварительно обработанные тексты", "Взвешенный мешок слов")).run()
-        threading.Thread(target=learning, args=(X_train_stemmingTF, y_train_stemmingTF, "тексты после стемминга", "Взвешенный мешок слов")).run()
+        threading.Thread(target=learning, args=(X_trainTF, y_trainTF, X_testTF, y_testTF, "исходные тексты", "Взвешенный мешок слов")).run()
+        threading.Thread(target=learning, args=(X_train_preprocessTF, y_train_preprocessTF, X_test_preprocessTF, y_test_preprocessTF, "предварительно обработанные тексты", "Взвешенный мешок слов")).run()
+        threading.Thread(target=learning, args=(X_train_stemmingTF, y_train_stemmingTF, X_test_stemmingTF, y_test_stemmingTF, "тексты после стемминга", "Взвешенный мешок слов")).run()
     sys.stdout = sys.__stdout__
-
 
     # learning(X_train_preprocess, y_train_preprocess, 2)
     # learning(X_train_stemming, y_train_stemming, 3)
