@@ -143,7 +143,7 @@ for i in range(len(p)):
         skalP[i] = np.dot(p[i], p[5472])
 
 top = [key for key, value in sorted(skalP.items(), key=lambda x: x[1], reverse=True)]
-print(top)
+# print(top)
 print(f"Имя самого похожего человека по просмотренным фильмам с 5472: {users[top[0]]}")
 films1 = ratings[5472]
 films2 = ratings[top[0]]
